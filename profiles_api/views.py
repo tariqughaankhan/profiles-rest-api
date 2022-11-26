@@ -2,6 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from profiles_api import serializers
+from rest_framework import viewsets
+from profiles_api import models
+from rest_framework import filters
+
+from rest_framework.authentication import TokenAuthentication
+from profiles_api import permissions
+
 
 class HelloApiView (APIView):
 
@@ -37,4 +44,20 @@ class HelloApiView (APIView):
     def patch(request,pk=None):
          return Response({'methods':'PATCH'})
     def delete(request,pk=None):
-         return Response({'methods':'Delete'}) 
+         return Response({'methods':'Delete'})
+class HelloViewSet(viewsets.ViewSet):
+    def list(self, request):
+        as_data=[
+        'Uses actions (list, create, retrieve, update, partial_update)',
+            'Automatically maps to URLS using Routers',
+            'Provides more functionality with less code',
+        ]
+        return Response({'message':'helo','as_data':as_data})
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Handle creating, creating and updating profiles"""
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.UpdateOwnProfile,)
+    filter_backend=(filters.SearchFilter,)
+    search_fields=('name','email',)
